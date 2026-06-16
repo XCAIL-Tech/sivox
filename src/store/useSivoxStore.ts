@@ -21,6 +21,7 @@ interface SivoxState {
   toggleCaps: () => void;
   setScanState: (state: ScanState) => void;
   setScanning: (scanning: boolean) => void;
+  stopScanning: () => void;
   setPredictions: (words: string[]) => void;
   updateSettings: (partial: Partial<SivoxSettings>) => void;
   recordWordUsage: (word: string) => void;
@@ -78,6 +79,11 @@ export const useSivoxStore = create<SivoxState>()(
       setScanState: (scanState) => set({ scanState }),
 
       setScanning: (isScanning) => set({ isScanning }),
+
+      stopScanning: () => {
+        set({ isScanning: false, scanState: { level: "idle" } });
+        if (navigator.vibrate) navigator.vibrate([15, 10, 15]);
+      },
 
       setPredictions: (predictions) => set({ predictions }),
 

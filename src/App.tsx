@@ -2,16 +2,17 @@ import { useCallback } from "react";
 import { TextDisplay } from "@/components/TextDisplay";
 import { Grid } from "@/components/Grid";
 import { SelectButton } from "@/components/SelectButton";
+import { SpeedSelector } from "@/components/SpeedSelector";
 import { useSivoxStore } from "@/store/useSivoxStore";
 import { useScanner } from "@/hooks/useScanner";
 import { usePrediction } from "@/hooks/usePrediction";
-import { QWERTY_ROWS, ALPHABETICAL_ROWS } from "@/lib/layouts";
+import { buildAllRows } from "@/lib/layouts";
 import type { GridCell } from "@/types";
 
 export default function App() {
   const {
-    isScanning,
     settings,
+    predictions,
     appendChar,
     deleteLastChar,
     clearText,
@@ -23,17 +24,8 @@ export default function App() {
 
   usePrediction();
 
-  const letterRows =
-    settings.layout === "qwerty" ? QWERTY_ROWS : ALPHABETICAL_ROWS;
-
-  // Fila 0 de predicciones — vacía como placeholder para el scanner
-  const predictionRowPlaceholder: GridCell[] = Array.from({ length: 10 }, (_, i) => ({
-    id: `pred-ph-${i}`,
-    label: "",
-    type: "prediction" as const,
-  }));
-
-  const allRows = [predictionRowPlaceholder, ...letterRows];
+  // Única fuente de verdad para el scanner — igual estructura que Grid.tsx
+  const allRows = buildAllRows(predictions, settings.layout);
 
   const handleCellSelect = useCallback(
     (cell: GridCell) => {
@@ -52,14 +44,14 @@ export default function App() {
             recordWordUsage(cell.value);
           }
           break;
+        case "speak":
+          speak();
+          break;
         case "backspace":
           deleteLastChar();
           break;
         case "clear":
           clearText();
-          break;
-        case "speak":
-          speak();
           break;
         case "caps":
           toggleCaps();
@@ -71,35 +63,41 @@ export default function App() {
     [appendChar, deleteLastChar, clearText, speak, selectPrediction, toggleCaps, recordWordUsage]
   );
 
-  const { handleSelect } = useScanner({
-    rows: allRows,
-    onCellSelect: handleCellSelect,
-  });
+  const { handleSelect } = useScanner({ rows: allRows, onCellSelect: handleCellSelect });
 
   return (
-    <div className="h-full flex flex-col bg-background p-2 gap-2 no-select">
+    <div className="h-full flex flex-col bg-background no-select overflow-hidden">
+
       {/* Navbar */}
-      <header className="flex items-center justify-between px-2 shrink-0">
-        <span className="text-sivox-500 font-bold text-lg tracking-widest">
+      <header className="flex items-center justify-between px-4 py-2 shrink-0 border-b border-border/50">
+        <span className="text-sivox-500 font-bold text-base tracking-widest">
           SIVOX
         </span>
         <span className="text-xs text-muted-foreground">XCAIL Technologies</span>
       </header>
 
-      {/* Display */}
-      <div className="shrink-0">
+      {/* Caja de texto */}
+      <div className="px-3 pt-3 pb-2 shrink-0">
         <TextDisplay />
       </div>
 
-      {/* Grid */}
-      <div className="flex-1 min-h-0">
+      {/* Separador visual */}
+      <div className="mx-3 border-t border-border/30 shrink-0" />
+
+      {/* Grid — ocupa todo el espacio disponible */}
+      <div className="flex-1 min-h-0 px-3 py-2">
         <Grid />
       </div>
 
-      {/* Botón central */}
-      <div className="flex justify-center shrink-0 pb-1">
-        <SelectButton onSelect={handleSelect} isScanning={isScanning} />
+      {/* Separador visual */}
+      <div className="mx-3 border-t border-border/30 shrink-0" />
+
+      {/* Panel inferior: velocidad + botones */}
+      <div className="shrink-0 pb-2 pt-2 flex flex-col gap-2">
+        <SpeedSelector />
+        <SelectButton onSelect={handleSelect} />
       </div>
+
     </div>
   );
 }

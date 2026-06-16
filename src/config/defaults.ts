@@ -14,8 +14,12 @@ export const DEFAULT_SETTINGS: SivoxSettings = {
   autoPauseAfter: 30,
 };
 
-export const SCAN_SPEEDS = {
-  row: { min: 500, max: 4000, default: 1500, step: 100 },
-  cell: { min: 200, max: 3000, default: 800, step: 100 },
-  pause: { min: 0, max: 1000, default: 200, step: 50 },
-};
+export const SPEED_PRESETS = [
+  { label: "Muy lento", rowSpeed: 3000, cellSpeed: 2000 },
+  { label: "Lento",     rowSpeed: 2000, cellSpeed: 1400 },
+  { label: "Medio",     rowSpeed: 1500, cellSpeed: 800  },
+  { label: "Rápido",    rowSpeed: 900,  cellSpeed: 500  },
+  { label: "Muy rápido", rowSpeed: 500, cellSpeed: 300  },
+] as const;
+
+export type SpeedPresetIndex = 0 | 1 | 2 | 3 | 4;
