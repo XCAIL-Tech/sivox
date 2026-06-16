@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 230 100% 6%;
+    --foreground: 0 0% 100%;
+    --card: 220 76% 10%;
+    --card-foreground: 0 0% 100%;
+    --popover: 220 76% 10%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 195 100% 50%;
+    --primary-foreground: 230 100% 6%;
+    --secondary: 220 76% 16%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 76% 16%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 255 100% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 76% 20%;
+    --input: 220 76% 20%;
+    --ring: 195 100% 50%;
+    --radius: 0.75rem;
+    --sivox-bg: #000020;
+    --sivox-cell-inactive: hsl(220 76% 16%);
+    --sivox-scan-row: rgba(0, 191, 255, 0.30);
+    --sivox-scan-cell: rgba(0, 191, 255, 0.80);
+    --sivox-action-cell: rgba(252, 163, 17, 0.15);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+@layer utilities {
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
