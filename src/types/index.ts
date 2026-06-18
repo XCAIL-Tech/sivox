@@ -27,10 +27,19 @@ export interface SivoxSettings {
   autoPauseAfter: number;
 }
 
+export type Row0Mode = "predictions" | "frases" | "numeros";
+
+export type GridCellType =
+  | "letter" | "space" | "punctuation" | "prediction" | "speak"
+  | "backspace" | "clear" | "caps" | "enter" | "empty"
+  | "frases" | "numeros" | "back" | "number" | "frase"
+  | "sos" | "sos-continue" | "sos-cancel-init" | "sos-confirm-cancel" | "sos-confirm-continue"
+  | "indicator";
+
 export interface GridCell {
   id: string;
   label: string;
-  type: "letter" | "space" | "backspace" | "clear" | "speak" | "enter" | "caps" | "numbers" | "punctuation" | "prediction";
+  type: GridCellType;
   value?: string;
-  action?: string;
+  span?: number; // columnas CSS que ocupa la celda (default: 1)
 }

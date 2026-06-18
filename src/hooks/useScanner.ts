@@ -111,8 +111,12 @@ export function useScanner({ rows, onCellSelect }: UseScannerProps) {
         onCellSelect(cell);
         if (navigator.vibrate) navigator.vibrate([30]);
       }
-      // Vuelve al barrido de filas
-      setScanState({ level: "row", activeRow: 0 });
+      // Al activar un modo de fila 0 (FRASES / 123), saltar directo a sus celdas
+      if (cell?.type === "frases" || cell?.type === "numeros") {
+        setScanState({ level: "cell", activeRow: 0, activeCell: 0 });
+      } else {
+        setScanState({ level: "row", activeRow: 0 });
+      }
     }
   }, [
     isScanning,

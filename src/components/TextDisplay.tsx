@@ -20,11 +20,7 @@ export function TextDisplay() {
         </span>
       )}
       <p className="flex-1 text-xl font-bold leading-snug text-foreground break-words min-h-[28px]">
-        {composedText || (
-          <span className="text-muted-foreground font-normal text-base">
-            Empezá a escribir...
-          </span>
-        )}
+        {composedText}
         {composedText && <span className="animate-pulse">|</span>}
       </p>
     </div>

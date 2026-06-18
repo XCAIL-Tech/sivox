@@ -1,157 +1,236 @@
-# SIVOX
+# SIVOX — Comunicador AAC con IA Predictiva
 
-**Comunicador AAC con IA Predictiva y Barrido Universal**  
-Producto de [XCAIL Technologies SAS](https://xcail.com) — Buenos Aires, Argentina
+**SIVOX** es un comunicador de comunicación aumentativa y alternativa (CAA/AAC) desarrollado por **XCAIL Technologies SAS**. Permite a personas con discapacidad motora componer y verbalizar mensajes mediante barrido automático por filas y celdas, con predicción de palabras en tiempo real.
 
----
-
-## ¿Qué es SIVOX?
-
-SIVOX es una **Progressive Web App (PWA)** de comunicación aumentativa y alternativa (AAC) diseñada para personas con discapacidad motora que no pueden hablar o tienen dificultades para comunicarse.
-
-Permite componer y expresar mensajes mediante:
-- **Teclado virtual con barrido automático** en dos niveles (fila → celda)
-- **Predicción de texto por IA** — offline con diccionario local, online con Gemini API
-- **Síntesis de voz** — offline con Web Speech API, fase 2 con voces neurales de GCP
-- **Input universal one-switch** — cualquier dispositivo que emule `Enter` o `Space`
+> **URL actual:** `https://sivox.web.app` · **URL futura:** `https://sivox.app`
 
 ---
 
-## Principios de diseño
-
-| Principio | Descripción |
-|-----------|-------------|
-| **Offline-first** | Las funciones esenciales funcionan sin conexión |
-| **One-switch** | El único input necesario es un único botón |
-| **Cloud-optional** | IA y voces neurales se activan cuando hay internet |
-| **Escalabilidad clínica** | Configuración de voces, layouts y velocidades por profesional o usuario |
-
----
-
-## Stack Tecnológico
+## Stack tecnológico
 
 | Capa | Tecnología |
 |------|-----------|
-| Framework | React 18 + Vite 5 + TypeScript 5 |
-| Estilos | Tailwind CSS 3 + shadcn/ui |
-| Estado | Zustand |
-| Data fetching | React Query |
-| PWA / Offline | Workbox 7 + vite-plugin-pwa |
-| Backend | Firebase Auth + Firestore + Analytics |
-| IA (fase 2) | Gemini API + GCP Cloud Text-to-Speech Neural |
-| Deploy | Firebase Hosting |
+| Framework | Vite 6 + React 18 + TypeScript (strict) |
+| Estado global | Zustand 5 |
+| Estilos | Tailwind CSS 3 |
+| PWA / Offline | vite-plugin-pwa + Workbox 7 |
+| Routing | React Router v6 |
+| Backend | Firebase Auth + Firestore + Hosting |
+| IA (Fase 6) | Gemini `gemini-2.5-flash-lite` |
+| TTS | Web Speech API → Google Cloud TTS Neural2 (Fase 7) |
+| Deploy | Firebase Hosting (`sivox.web.app`) |
 
 ---
 
-## Inicio rápido
+## Comandos
 
 ```bash
-# Instalar dependencias
-npm install
+npm run dev       # Dev server → http://localhost:5173
+npm run build     # TypeScript check + Vite build → dist/
+npm run preview   # Preview del build → http://localhost:4173
+npm run lint      # ESLint
 
-# Desarrollo
-npm run dev
-
-# Build de producción
-npm run build
-
-# Deploy en Firebase Hosting
-npm run build && npx firebase deploy
+# Deploy
+npm run build && npx firebase deploy --only hosting
 ```
 
 ---
 
-## Estructura del proyecto
+## Arquitectura
 
 ```
 sivox/
-├── public/
-│   ├── manifest.json           # PWA manifest
-│   ├── icons/                  # Íconos adaptivos (48–512px)
-│   └── data/
-│       └── diccionario_es.json # Corpus offline ~10k palabras (español)
-│
 ├── src/
 │   ├── components/
-│   │   ├── TextDisplay.tsx     # Caja de texto superior
-│   │   ├── Grid.tsx            # Grid 5×10
-│   │   ├── GridCell.tsx        # Celda individual con estados de barrido
-│   │   ├── PredictionRow.tsx   # Fila 0: palabras predictivas
-│   │   ├── SelectButton.tsx    # Botón central de selección
-│   │   └── Sidebar.tsx         # Panel de configuración
-│   │
-│   ├── hooks/
-│   │   ├── useScanner.ts       # Motor de barrido (state machine)
-│   │   ├── useTTS.ts           # Web Speech API → GCP TTS
-│   │   ├── usePrediction.ts    # Predicción offline/online
-│   │   ├── useKeyboard.ts      # Listener Enter/Space/click
-│   │   └── useSettings.ts      # Preferencias del usuario
-│   │
-│   ├── store/
-│   │   └── useSivoxStore.ts    # Estado global Zustand
-│   │
-│   └── lib/
-│       ├── prediction.ts       # Motor de predicción offline
-│       ├── tts.ts              # Abstracción TTS (web → GCP)
-│       └── layouts.ts          # QWERTY / Alfabético
-│
-└── docs/                       # Especificaciones técnicas
+│   │   ├── layout/       # NavBar (landing), Footer
+│   │   └── ...           # TextDisplay, Grid, GridCell, SelectButton, Sidebar
+│   ├── hooks/            # useScanner, usePrediction, useTTS, useAuth
+│   ├── pages/            # RootPage, LandingPage, LoginPage, RegisterPage
+│   ├── store/            # useSivoxStore (Zustand)
+│   ├── lib/              # prediction.ts, tts.ts, layouts.ts, firebase.ts, sos.ts
+│   ├── config/           # defaults.ts
+│   └── types/            # index.ts
+└── public/
+    ├── icons/            # SVG + PNG icons para PWA
+    └── data/
+        └── diccionario_es.json   # Corpus offline de predicción
 ```
 
 ---
 
-## Compatibilidad con dispositivos de acceso
+## Motor de barrido
 
-SIVOX no requiere drivers especiales. Funciona con cualquier dispositivo que genere un evento `Enter` o `Space`:
+Input único: `Enter` / `Space` / click en `SelectButton`.
 
-| Dispositivo | Método |
-|------------|--------|
-| Mouse / trackpad | Click en botón central |
-| Teclado estándar | `Enter` o `Espacio` |
-| Pulsador / pedal USB | Emula tecla Enter/Space |
-| Switch Bluetooth (Arduino + HC-05) | BLE HID → Enter/Space |
-| Eye-tracking (Tobii, EyeTech) | Dwell-click |
-| BCI no invasivo (Muse, OpenBCI) | Middleware → Enter |
-| Pantalla táctil | Tap en botón central |
+```
+idle → row → cell → (selección) → row → ...
+```
+
+| Estado | Descripción |
+|--------|-------------|
+| `idle` | En reposo |
+| `row` | Barrido de filas (resalta fila activa con `▸`) |
+| `cell` | Barrido de celdas dentro de la fila activa |
+
+**Fila 0** → predicciones / frases rápidas / modo números (dinámica)  
+**Filas 1–3** → letras (QWERTY o ABC)  
+**Fila 4** → funciones (espacio, voz, borrar, SOS)
 
 ---
 
-## Fases de desarrollo
+## Rutas
 
-- [x] **Fase 0** — Setup: repo, Vite + React + TS, Firebase, deploy inicial
-- [ ] **Fase 1** — Core MVP: motor de barrido, teclado QWERTY, TTS básico
-- [ ] **Fase 2** — Predicción offline + panel de configuración
-- [ ] **Fase 3** — PWA completa + modo avión verificado
-- [ ] **Fase 4** — Firebase Auth + Firestore
-- [ ] **Fase 5** — Gemini API (predicción contextual) + GCP Neural TTS
-- [ ] **Fase 6** — Web Bluetooth API + eye-tracking dwell + BCI
+| URL | Contenido |
+|-----|-----------|
+| `/` | Comunicador (si autenticado) · Landing (si no autenticado) |
+| `/login` | Iniciar sesión |
+| `/registro` | Crear cuenta |
+
+---
+
+## Roadmap de Fases
+
+### ✅ Fase 0 — Comunicador Core
+
+- [x] Teclado QWERTY y ABC con barrido automático
+- [x] Motor de barrido: state machine `idle → row → cell`
+- [x] Celda indicadora `▸` por fila (buffer visual de inicio de fila)
+- [x] Barrido infinito (`autoPauseAfter: 0`)
+- [x] Fila 0 dinámica: predicciones / frases rápidas / números
+- [x] Predicción offline con diccionario en español
+- [x] Palabras frecuentes por defecto al iniciar
+- [x] Frases rápidas predefinidas (9 frases)
+- [x] Modo SOS: sirena Web Audio API + overlay de confirmación 2 pasos
+- [x] TTS con Web Speech API (offline, voz del sistema)
+- [x] Auto-limpieza de texto al hablar y al cancelar SOS
+- [x] Salto directo a modo celda al activar 123 o FRASES
+- [x] Selector de velocidad de barrido (5 presets)
+- [x] Diseño dark (`#000020`) con acento sivox-500 (`#00BFFF`)
+
+---
+
+### ⏳ Fase 1 — PWA (Instalable)
+
+- [x] `vite-plugin-pwa` + Workbox configurado
+- [x] `manifest.json` generado: nombre, colores, orientación landscape
+- [x] Caché offline: assets + diccionario (`/data/*`)
+- [x] Meta tags PWA en `index.html` (Apple + Android)
+- [x] React Router instalado y rutas configuradas
+- [x] Routing raíz: `/` → comunicador (auth) o landing (no auth)
+- [ ] Íconos PNG 192×192 y 512×512 exportados desde SVG
+- [ ] Verificar Lighthouse PWA score ≥ 90
+- [ ] Probar instalación en Android (Chrome) y iOS (Safari Add to Home Screen)
+
+---
+
+### ⏳ Fase 5 — Landing Page
+
+- [x] Routing raíz inteligente: `/` → comunicador o landing según auth
+- [x] Página landing: Hero + Features + Cómo funciona + CTA + Footer
+- [x] NavBar con logo + "Iniciar sesión" + "Empezar gratis"
+- [x] Rutas `/login` y `/registro` con páginas placeholder
+- [ ] Animaciones de entrada (CSS o Framer Motion)
+- [ ] Responsivo mobile verificado en dispositivos reales
+
+---
+
+### 🔒 Fase 2 — Autenticación
+
+- [ ] Firebase Auth: email/contraseña
+- [ ] Firebase Auth: Google OAuth
+- [ ] Modo anónimo (acceso sin cuenta)
+- [ ] Página de Login funcional (`/login`)
+- [ ] Guard de rutas: redirigir a `/login` si no autenticado
+
+---
+
+### 📋 Fase 3 — Registro de usuarios
+
+- [ ] Formulario: nombre, apellido, país, género
+- [ ] Checkbox TyC + Política de privacidad
+- [ ] Guardado en Firestore: `users/{uid}/profile`
+- [ ] Flujo post-registro → redirigir al comunicador
+
+---
+
+### ⚙️ Fase 4 — Sidebar de Configuración
+
+- [ ] Toggle mayúsculas/minúsculas
+- [ ] Selector de layout: QWERTY / ABC
+- [ ] Selector de voz TTS
+- [ ] Ajuste de velocidad (presets + slider)
+- [ ] Editor de frases rápidas: agregar, editar, eliminar
+- [ ] Frases rápidas en múltiples filas (barrido por filas de frases)
+- [ ] Toggle modo claro/oscuro
+
+---
+
+### 💾 Fase 4b — Persistencia en la nube
+
+- [ ] Sincronizar settings del usuario con Firestore
+- [ ] Sincronizar frases rápidas personalizadas
+- [ ] Sincronizar historial de palabras frecuentes
+- [ ] Datos anónimos de uso para analytics de políticas públicas
+
+---
+
+### 🤖 Fase 6 — IA Contextual (Gemini)
+
+- [ ] Integración Gemini `gemini-2.5-flash-lite`
+- [ ] Predicción contextual basada en texto compuesto
+- [ ] Fallback automático a diccionario offline si no hay red
+
+---
+
+### 🔊 Fase 7 — TTS Neural (Google Cloud)
+
+- [ ] Google Cloud TTS Neural2, región `southamerica-east1`
+- [ ] Selector de voces premium en sidebar
+- [ ] Fallback a Web Speech API offline
+
+---
+
+### 📱 Fase 8 — Google Play Store (TWA)
+
+- [ ] Empaquetado con Bubblewrap (TWA)
+- [ ] Assets de Play Store (capturas, descripción, íconos)
+- [ ] Firma digital (DUNS disponible)
+- [ ] Digital Asset Links para verificación TWA
+
+---
+
+## Variables de entorno
+
+```bash
+# Copiar .env.example → .env.local y completar:
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=sivox-app
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_MEASUREMENT_ID=
+VITE_GEMINI_API_KEY=          # Fase 6
+```
 
 ---
 
 ## Paleta visual
 
-| Elemento | Color |
-|---------|-------|
-| Fondo (dark) | `#000020` |
-| Celda inactiva | `hsl(220 76% 16%)` |
-| Barrido fila activa | `#00BFFF` 30% |
-| Barrido celda activa | `#00BFFF` 80% |
-| Botón selección | `#5F33FF → #00BFFF` |
-| Celdas de acción | `#fca311` 15% |
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `#000020` | Background principal | Fondo de pantalla |
+| `#00BFFF` | sivox-500 — acento | Títulos, scan-cell, CTAs |
+| `#5F33FF` | xcail-purple | Gradiente botones |
+| `#fca311` | xcail-action | SOS, alertas |
+| `rgba(0,191,255,0.30)` | scan-row | Fila activa |
+| `rgba(0,191,255,0.80)` | scan-cell | Celda activa |
 
 ---
 
-## Documentación
+## Sobre XCAIL Technologies
 
-- [Especificación técnica del MVP](docs/informe_sivox_mvp.md)
-- [Contexto de postulación GCP](docs/informe_postulacion_gcp.md)
-
----
-
-## Empresa
-
-**XCAIL Technologies SAS** — Startup de IA aplicada a neurodesarrollo y accesibilidad.  
-Web: [xcail.com](https://xcail.com) | Contacto: contacto@xcail.com  
-Buenos Aires, Argentina
+**XCAIL Technologies SAS** — Buenos Aires, Argentina.  
+Tecnología accesible para comunidades con necesidades especiales.
 
 Otros productos: [AsisTEA](https://asistea.app) — Plataforma IA para familias y personas neurodivergentes.

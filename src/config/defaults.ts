@@ -1,5 +1,21 @@
 import type { SivoxSettings } from "@/types";
 
+export const DEFAULT_INITIAL_WORDS = [
+  "hola", "sí", "no", "bien", "gracias", "quiero", "ayuda", "tengo",
+];
+
+export const QUICK_PHRASES = [
+  "Hola, ¿cómo estás?",
+  "Necesito ayuda",
+  "Tengo hambre",
+  "Tengo sed",
+  "Tengo dolor",
+  "Estoy bien",
+  "Gracias",
+  "Por favor",
+  "Llamen a mi familia",
+];
+
 export const DEFAULT_SETTINGS: SivoxSettings = {
   rowSpeed: 1500,
   cellSpeed: 800,
@@ -11,7 +27,7 @@ export const DEFAULT_SETTINGS: SivoxSettings = {
   ttsEngine: "web",
   theme: "dark",
   language: "es",
-  autoPauseAfter: 30,
+  autoPauseAfter: 0,
 };
 
 export const SPEED_PRESETS = [

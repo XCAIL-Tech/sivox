@@ -6,26 +6,37 @@ import { SpeedSelector } from "@/components/SpeedSelector";
 import { useSivoxStore } from "@/store/useSivoxStore";
 import { useScanner } from "@/hooks/useScanner";
 import { usePrediction } from "@/hooks/usePrediction";
-import { buildAllRows } from "@/lib/layouts";
+import { buildAllRows, buildSosRows } from "@/lib/layouts";
 import type { GridCell } from "@/types";
 
 export default function App() {
   const {
     settings,
     predictions,
+    row0Mode,
+    isSos,
+    sosConfirming,
     appendChar,
     deleteLastChar,
     clearText,
     speak,
     selectPrediction,
+    applyFrase,
     toggleCaps,
     recordWordUsage,
+    setRow0Mode,
+    activateSos,
+    continueSos,
+    initiateCancelSos,
+    confirmCancelSos,
   } = useSivoxStore();
 
   usePrediction();
 
-  // Única fuente de verdad para el scanner — igual estructura que Grid.tsx
-  const allRows = buildAllRows(predictions, settings.layout);
+  // Durante SOS el scanner usa las filas de alerta; en modo normal usa el teclado completo
+  const allRows = isSos
+    ? buildSosRows(sosConfirming)
+    : buildAllRows(predictions, settings.layout, row0Mode);
 
   const handleCellSelect = useCallback(
     (cell: GridCell) => {
@@ -38,11 +49,29 @@ export default function App() {
         case "enter":
           appendChar(cell.value ?? cell.label);
           break;
+        case "number":
+          appendChar(cell.value ?? cell.label);
+          break;
         case "prediction":
           if (cell.value) {
             selectPrediction(cell.value);
             recordWordUsage(cell.value);
           }
+          break;
+        case "frase":
+          if (cell.value) {
+            applyFrase(cell.value);
+            setRow0Mode("predictions");
+          }
+          break;
+        case "frases":
+          setRow0Mode("frases");
+          break;
+        case "numeros":
+          setRow0Mode("numeros");
+          break;
+        case "back":
+          setRow0Mode("predictions");
           break;
         case "speak":
           speak();
@@ -56,11 +85,30 @@ export default function App() {
         case "caps":
           toggleCaps();
           break;
+        case "sos":
+          activateSos();
+          break;
+        case "sos-continue":
+        case "sos-confirm-continue":
+          continueSos();
+          break;
+        case "sos-cancel-init":
+          initiateCancelSos();
+          break;
+        case "sos-confirm-cancel":
+          confirmCancelSos();
+          break;
+        case "indicator":
+          break; // celda buffer visual — no hace nada al seleccionarse
         default:
           break;
       }
     },
-    [appendChar, deleteLastChar, clearText, speak, selectPrediction, toggleCaps, recordWordUsage]
+    [
+      appendChar, deleteLastChar, clearText, speak, selectPrediction,
+      applyFrase, toggleCaps, recordWordUsage, setRow0Mode,
+      activateSos, continueSos, initiateCancelSos, confirmCancelSos,
+    ]
   );
 
   const { handleSelect } = useScanner({ rows: allRows, onCellSelect: handleCellSelect });

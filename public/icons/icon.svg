@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo -->
+  <rect width="512" height="512" rx="80" fill="#000020"/>
+  <!-- Ecualizador de audio — 5 barras centradas, simétricas -->
+  <rect x="70"  y="186" width="52" height="140" rx="16" fill="#00BFFF" opacity="0.55"/>
+  <rect x="150" y="146" width="52" height="220" rx="16" fill="#00BFFF" opacity="0.75"/>
+  <rect x="230" y="96"  width="52" height="320" rx="16" fill="#00BFFF"/>
+  <rect x="310" y="146" width="52" height="220" rx="16" fill="#00BFFF" opacity="0.75"/>
+  <rect x="390" y="186" width="52" height="140" rx="16" fill="#00BFFF" opacity="0.55"/>
+</svg>
