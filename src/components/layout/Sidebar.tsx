@@ -14,10 +14,8 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const { user } = useAuth();
-  const { settings, updateSettings } = useSivoxStore(s => ({
-    settings: s.settings,
-    updateSettings: s.updateSettings,
-  }));
+  const settings = useSivoxStore(s => s.settings);
+  const updateSettings = useSivoxStore(s => s.updateSettings);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
