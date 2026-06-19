@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic2 } from "lucide-react";
+import { Mic2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { recordLegalConsent, saveOnboardingProfile } from "@/lib/userProfile";
@@ -48,7 +48,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="h-full overflow-y-auto bg-slate-50 flex flex-col">
 
       {/* Header */}
       <header className="bg-white border-b border-slate-100 px-4 py-3">
@@ -88,8 +88,9 @@ export default function OnboardingPage() {
         <div className="w-full max-w-2xl">
 
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm font-bold">
-              ⚠️ {error}
+            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm font-bold flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              {error}
             </div>
           )}
 

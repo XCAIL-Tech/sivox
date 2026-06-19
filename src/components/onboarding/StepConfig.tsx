@@ -1,4 +1,4 @@
-import { Volume2 } from "lucide-react";
+import { Volume2, Mic2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { OnboardingData } from "@/types/onboarding";
 
@@ -110,9 +110,9 @@ export function StepConfig({ data, onChange, onNext, onBack, loading }: Props) {
         </label>
         <div className="grid grid-cols-2 gap-4">
           {([
-            { id: "female" as const, label: "Femenina", emoji: "👩" },
-            { id: "male"   as const, label: "Masculina", emoji: "👨" },
-          ]).map(({ id, label, emoji }) => {
+            { id: "female" as const, label: "Femenina", sub: "Voz de mujer" },
+            { id: "male"   as const, label: "Masculina", sub: "Voz de hombre" },
+          ]).map(({ id, label, sub }) => {
             const isActive = data.tts_voice_gender === id;
             return (
               <button
@@ -127,13 +127,14 @@ export function StepConfig({ data, onChange, onNext, onBack, loading }: Props) {
                 )}
               >
                 <div className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center text-2xl",
+                  "w-12 h-12 rounded-2xl flex items-center justify-center",
                   isActive ? "bg-sivox-100" : "bg-slate-50",
                 )}>
-                  {emoji}
+                  <Mic2 className={cn("w-6 h-6", isActive ? "text-sivox-600" : "text-slate-400")} />
                 </div>
-                <div className={cn("text-sm font-black", isActive ? "text-sivox-700" : "text-slate-700")}>
-                  {label}
+                <div>
+                  <div className={cn("text-sm font-black", isActive ? "text-sivox-700" : "text-slate-700")}>{label}</div>
+                  <div className="text-[11px] text-slate-400 font-medium">{sub}</div>
                 </div>
               </button>
             );

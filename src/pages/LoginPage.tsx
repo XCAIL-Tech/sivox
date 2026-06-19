@@ -153,7 +153,7 @@ export default function LoginPage({ initialView = "welcome" }: { initialView?: V
   }
 
   return (
-    <div className="relative flex flex-col lg:flex-row bg-white min-h-screen lg:min-h-screen">
+    <div className="relative flex flex-col lg:flex-row bg-white h-full overflow-y-auto">
       <LeftPanel />
 
       {/* Panel derecho */}

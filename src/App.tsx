@@ -1,8 +1,10 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { SlidersHorizontal } from "lucide-react";
 import { TextDisplay } from "@/components/TextDisplay";
 import { Grid } from "@/components/Grid";
 import { SelectButton } from "@/components/SelectButton";
 import { SpeedSelector } from "@/components/SpeedSelector";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { useSivoxStore } from "@/store/useSivoxStore";
 import { useScanner } from "@/hooks/useScanner";
 import { usePrediction } from "@/hooks/usePrediction";
@@ -10,6 +12,8 @@ import { buildAllRows, buildSosRows } from "@/lib/layouts";
 import type { GridCell } from "@/types";
 
 export default function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const {
     settings,
     predictions,
@@ -116,12 +120,18 @@ export default function App() {
   return (
     <div className="h-full flex flex-col bg-background no-select overflow-hidden">
 
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
       {/* Navbar */}
       <header className="flex items-center justify-between px-4 py-2 shrink-0 border-b border-border/50">
-        <span className="text-sivox-500 font-bold text-base tracking-widest">
-          SIVOX
-        </span>
-        <span className="text-xs text-muted-foreground">XCAIL Technologies</span>
+        <span className="text-sivox-500 font-bold text-base tracking-widest">SIVOX</span>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-2 rounded-xl hover:bg-muted transition-colors"
+          aria-label="Abrir configuración"
+        >
+          <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
+        </button>
       </header>
 
       {/* Caja de texto */}

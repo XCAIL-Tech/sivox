@@ -9,6 +9,9 @@ export interface UserProfile {
   email: string;
   name: string;
   profile_completed: boolean;
+  user_name?: string;
+  country?: string;
+  country_name?: string;
   terms_accepted_at?: unknown;
   terms_version?: string;
   privacy_version?: string;
