@@ -408,4 +408,153 @@ La visión de largo plazo es consolidar a XCAIL como la empresa de referencia en
 
 ---
 
+## Sistema de Métodos de Acceso
+
+Uno de los principios fundamentales de SIVOX es que ninguna persona interactúa con la tecnología de la misma manera. La plataforma no impone un único método de entrada: se adapta a las capacidades motoras, sensoriales y cognitivas de cada usuario.
+
+Todos los métodos de acceso convergen en una misma acción interna:
+
+```
+SELECT
+```
+
+Esta acción es interpretada por el motor de barrido, permitiendo controlar el comunicador independientemente del dispositivo o tecnología utilizada. Esta separación es la que hace a SIVOX extensible: incorporar una nueva tecnología de acceso no requiere modificar el comunicador.
+
+### Arquitectura conceptual
+
+```
+              SIVOX AAC
+                   │
+    ┌──────────────┼──────────────┐
+    │              │              │
+ Teclado         Blink          Switch
+    │              │              │
+    └──────────────┼──────────────┘
+                   │
+                SELECT
+                   │
+           Motor de Barrido
+                   │
+             Comunicación
+```
+
+---
+
+### Métodos disponibles
+
+**Teclado (Enter / Espacio)**
+Método principal del MVP. Recomendado para usuarios con movilidad manual, pruebas y configuración inicial.
+
+**Mouse / Pantalla táctil**
+Click sobre el botón de selección. Recomendado para tablets, notebooks táctiles y evaluaciones clínicas.
+
+---
+
+## SIVOX Blink — Acceso visual mediante webcam (Offline-First)
+
+SIVOX Blink es el sistema de acceso visual de la plataforma SIVOX. Permite controlar el comunicador mediante gestos oculares detectados con una cámara estándar, sin necesidad de hardware especializado.
+
+El objetivo es ofrecer una alternativa de costo cero y alta disponibilidad para personas que no pueden utilizar teclado, mouse o pulsadores físicos.
+
+### Arquitectura tecnológica
+
+La detección se ejecuta completamente en el dispositivo del usuario. No se envía video a servidores externos.
+
+| Componente | Función |
+|-----------|---------|
+| MediaPipe Face Landmarker | Detección de landmarks faciales en tiempo real |
+| WebAssembly (WASM) | Ejecución del modelo de visión en el navegador |
+| TensorFlow Lite | Inferencia auxiliar cuando se requiere |
+| APIs del navegador | Acceso a cámara (`getUserMedia`) y PWA cache |
+
+### Compatibilidad de dispositivos
+
+PC de escritorio, notebooks, tablets Android, iPad y Chromebooks con navegadores modernos (Chrome, Edge, Firefox, Safari 15+).
+
+### Funcionamiento offline
+
+Los modelos de MediaPipe (~8–15 MB) se descargan durante el primer uso y quedan almacenados mediante Workbox. A partir de ese momento, SIVOX Blink funciona sin conexión a Internet — en hogares, escuelas, hospitales y centros de rehabilitación con conectividad limitada o inexistente.
+
+```
+Primera vez:        Usos posteriores:
+Descarga modelos    Cache local
+       ↓                  ↓
+  Almacena PWA      Carga instantánea
+       ↓                  ↓
+  Funciona online   Funciona offline
+```
+
+---
+
+### Modos de activación
+
+Cada usuario configura el gesto que mejor se adapta a sus capacidades. Todos generan el mismo evento `SELECT` hacia el motor de barrido.
+
+| Modo | Gesto | Perfil recomendado |
+|------|-------|--------------------|
+| **Parpadeo prolongado** | Ambos ojos cerrados por tiempo configurable | Movilidad facial reducida, inicio de uso |
+| **Doble parpadeo** | Dos parpadeos consecutivos en ventana temporal | Buen control voluntario de párpados |
+| **Guiño izquierdo** | Ojo izquierdo cerrado, derecho abierto | Control ocular independiente |
+| **Guiño derecho** | Ojo derecho cerrado, izquierdo abierto | Alternativa al guiño izquierdo |
+| **Ambos ojos prolongado** | Cierre extendido configurable | Comandos secundarios: pausar, confirmar, emergencia |
+
+El modo "Ambos ojos prolongado" está reservado para acciones de segundo nivel: pausar/reanudar barrido, abrir menú rápido o confirmar funciones críticas. Su duración extendida lo hace prácticamente imposible de activar de forma accidental.
+
+### Calibración personalizada
+
+En el primer uso, SIVOX Blink registra los parámetros basales del usuario:
+
+- Velocidad y duración del parpadeo natural
+- Apertura ocular promedio en reposo
+- Umbrales de detección para distinguir gesto voluntario de involuntario
+- Sensibilidad por modo de activación
+
+La calibración puede repetirse en cualquier momento desde la configuración del comunicador.
+
+---
+
+## Métodos de acceso planificados
+
+### SIVOX Switch + Access Core *(próximo)*
+
+Pulsadores físicos (mano, pie, mesa, mentón) conectados vía USB HID, Bluetooth HID o jack 3.5 mm a través del adaptador SIVOX Access Core (ESP32/RP2040). Genera `SELECT` de forma idéntica al resto de métodos.
+
+### SIVOX Eye *(largo plazo)*
+
+Seguimiento ocular de precisión para usuarios que conservan movilidad de mirada con limitaciones motoras severas. Evolución natural posterior a SIVOX Blink.
+
+### Interfaces BCI *(investigación futura)*
+
+Integración con sistemas Brain-Computer Interface para usuarios sin movilidad motora ni ocular.
+
+---
+
+## Múltiples métodos simultáneos
+
+SIVOX permite activar más de un método de acceso al mismo tiempo, brindando redundancia clínica real.
+
+```
+Métodos activos simultáneos:
+  ☑ Teclado         ☑ SIVOX Blink
+  ☐ Switch          ☐ Eye Tracking
+```
+
+Si el pulsador físico falla o no está disponible, el usuario continúa usando SIVOX Blink sin modificar el comunicador ni perder ninguna configuración. La transición es transparente.
+
+---
+
+## Filosofía de accesibilidad universal
+
+SIVOX no está diseñado para una única discapacidad ni para un único método de acceso. La plataforma se adapta a las capacidades remanentes de cada persona.
+
+| Horizonte | Métodos disponibles |
+|-----------|---------------------|
+| **Hoy** | Teclado, Mouse, Pantalla táctil, SIVOX Blink |
+| **Próximamente** | SIVOX Switch, SIVOX Access Core |
+| **Futuro** | Eye Tracking, Head Tracking, BCI |
+
+Todos los métodos convergen en un único objetivo: que cada persona pueda comunicarse e interactuar con autonomía usando la tecnología más adecuada para sus capacidades y contexto.
+
+---
+
 *XCAIL Technologies SAS — Buenos Aires, Argentina — `tech@xcail.com`*
